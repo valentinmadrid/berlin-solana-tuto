@@ -8,19 +8,27 @@ import {
   SystemProgram,
   Transaction,
 } from '@solana/web3.js';
-
 import { useState } from 'react';
+
+const connection = new Connection('https://api.devnet.solana.com');
 
 export default function Home() {
   const [keypair, setKeypair] = useState<Keypair>();
   const [solAddress, setSolAddress] = useState<string>('');
-  const [solAmount, setSolAmount] = useState<number>();
+  const [solAmount, setSolAmount] = useState<number>(0);
 
   const generateKeyPair = () => {};
 
   const airdropSOL = async () => {};
 
   const sendSOL = async (amount: number) => {};
+
+  const refreshBalance = async () => {
+    if (!keypair) return;
+    const newBalance = await connection.getBalance(keypair.publicKey);
+    setSolAmount(newBalance / LAMPORTS_PER_SOL);
+  };
+
   return (
     <div className='flex items-center justify-center p-5'>
       <div className='mt-10'>
@@ -44,6 +52,12 @@ export default function Home() {
           className='btn btn-primary w-full mt-5'
         >
           Send SOL to Address
+        </button>
+        <button
+          onClick={refreshBalance}
+          className='btn btn-primary w-full mt-5'
+        >
+          Refresh Balance
         </button>
 
         {keypair && (

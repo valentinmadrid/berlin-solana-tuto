@@ -10,6 +10,8 @@ import {
 } from '@solana/web3.js';
 import { useState } from 'react';
 
+const connection = new Connection(clusterApiUrl('devnet'));
+
 export default function Home() {
   const [keypair, setKeypair] = useState<Keypair>();
   const [solAddress, setSolAddress] = useState<string>('');
@@ -22,18 +24,20 @@ export default function Home() {
   };
 
   const airdropSOL = async () => {
-    const connection = new Connection(clusterApiUrl('devnet'));
     if (!keypair) return;
     const airdropSignature = await connection.requestAirdrop(
       keypair?.publicKey,
       LAMPORTS_PER_SOL
     );
+    console.log('ping1');
     const latestBlockhash = await connection.getLatestBlockhash();
     await connection.confirmTransaction({
       blockhash: latestBlockhash.blockhash,
       lastValidBlockHeight: latestBlockhash.lastValidBlockHeight,
       signature: airdropSignature,
     });
+
+    console.log('ping2');
     const newBalance = await connection.getBalance(keypair.publicKey);
     setSolAmount(newBalance / LAMPORTS_PER_SOL);
   };
@@ -59,6 +63,13 @@ export default function Home() {
     const newBalance = await connection.getBalance(keypair.publicKey);
     setSolAmount(newBalance / LAMPORTS_PER_SOL);
   };
+
+  const refreshBalance = async () => {
+    if (!keypair) return;
+    const newBalance = await connection.getBalance(keypair.publicKey);
+    setSolAmount(newBalance / LAMPORTS_PER_SOL);
+  };
+
   return (
     <div className='flex items-center justify-center p-5'>
       <div className='mt-10'>
@@ -82,6 +93,12 @@ export default function Home() {
           className='btn btn-primary w-full mt-5'
         >
           Send SOL to Address
+        </button>
+        <button
+          onClick={refreshBalance}
+          className='btn btn-primary w-full mt-5'
+        >
+          Refresh Balance
         </button>
 
         {keypair && (
